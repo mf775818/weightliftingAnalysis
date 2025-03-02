@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>舉重影片分析工具</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2/dist/chartjs-plugin-annotation.min.js"></script>
     <!-- OpenCV.js 库 -->
-    <script>// 預先加載OpenCV處理函數
+    <script>
+        // 預先加載OpenCV處理函數
         function loadOpenCV() {
             const script = document.createElement('script');
             script.setAttribute('async', '');
@@ -19,9 +19,11 @@
             document.head.appendChild(script);
         }
         // 在DOMContentLoaded後加載OpenCV
-        document.addEventListener('DOMContentLoaded', loadOpenCV);</script>
+        document.addEventListener('DOMContentLoaded', loadOpenCV);
+    </script>
     <!-- PoseNet 用於骨架分析 -->
-    <script>// 預先加載TensorFlow處理函數
+    <script>
+        // 預先加載TensorFlow處理函數
         function loadTensorFlow() {
             return new Promise((resolve, reject) => {
                 const script1 = document.createElement('script');
@@ -37,7 +39,7 @@
                 document.head.appendChild(script1);
             });
         }
-
+        
         // 在頁面加載完成後加載TensorFlow和PoseNet
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -50,7 +52,8 @@
                 console.error('Error loading TensorFlow or PoseNet', error);
                 showNotification('無法加載骨架分析模型，請檢查網絡連接或嘗試刷新頁面', 'error');
             }
-        });</script>
+        });
+    </script>
     <style>
         :root {
             --primary-color: #5D5CDE;
@@ -67,76 +70,60 @@
                 background-color: var(--dark-bg);
                 color: var(--dark-text);
             }
-
             .card {
                 background-color: #242424;
                 border-color: var(--dark-border);
             }
-
             input, select, textarea, button {
                 background-color: #2A2A2A;
                 border-color: var(--dark-border);
                 color: var(--dark-text);
             }
-
             .text-gray-700, .text-gray-600 {
                 color: #A0AEC0;
             }
-
             canvas {
                 background-color: #2A2A2A;
                 border-color: var(--dark-border);
             }
-
             .compare-overlay {
                 background-color: rgba(30, 30, 30, 0.7);
             }
-
             .tab {
                 background-color: #242424;
                 color: var(--dark-text);
                 border-color: var(--dark-border);
             }
-
-                .tab.active {
-                    background-color: var(--primary-color);
-                    color: white;
-                }
-
+            .tab.active {
+                background-color: var(--primary-color);
+                color: white;
+            }
             .text-secondary {
                 color: #9CA3AF;
             }
-
             .border-gray-200 {
                 border-color: #374151;
             }
-
             .bg-gray-50 {
                 background-color: #242424;
             }
-
             .text-gray-500 {
                 color: #9CA3AF;
             }
-
             .border-gray-300 {
                 border-color: #4B5563;
             }
-
             .video-controls {
                 background-color: rgba(30, 30, 30, 0.7);
             }
-
             .angle-overlay {
                 background-color: rgba(30, 30, 30, 0.7);
                 border-color: #4B5563;
             }
-
             .metrics-card {
                 background-color: #242424;
                 border-color: #374151;
             }
-
             .chart-container {
                 border-color: #374151;
                 background-color: #242424;
@@ -148,56 +135,45 @@
                 background-color: var(--light-bg);
                 color: var(--light-text);
             }
-
             .card {
                 background-color: white;
                 border-color: var(--light-border);
             }
-
             input, select, textarea, button {
                 background-color: white;
                 border-color: var(--light-border);
                 color: var(--light-text);
             }
-
             canvas {
                 background-color: #F9FAFB;
                 border-color: var(--light-border);
             }
-
             .compare-overlay {
                 background-color: rgba(240, 240, 240, 0.7);
             }
-
             .tab {
                 background-color: #F3F4F6;
                 color: var(--light-text);
                 border-color: var(--light-border);
             }
-
-                .tab.active {
-                    background-color: var(--primary-color);
-                    color: white;
-                }
-
+            .tab.active {
+                background-color: var(--primary-color);
+                color: white;
+            }
             .text-secondary {
                 color: #6B7280;
             }
-
             .video-controls {
                 background-color: rgba(240, 240, 240, 0.7);
             }
-
             .angle-overlay {
                 background-color: rgba(240, 240, 240, 0.7);
                 border-color: #E5E7EB;
             }
-
             .metrics-card {
                 background-color: white;
                 border-color: #E5E7EB;
             }
-
             .chart-container {
                 border-color: #E5E7EB;
                 background-color: white;
@@ -233,16 +209,12 @@
             aspect-ratio: 16/9; /* 確保有預設的寬高比 */
         }
 
-            .video-wrapper video {
-                display: block;
-                width: 100%;
-                height: 100%;
-                object-fit: contain; /* 保持比例完整顯示 */
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 1;
-            }
+        .video-wrapper video {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+        }
 
         .tracking-overlay, .skeleton-overlay {
             position: absolute;
@@ -284,9 +256,9 @@
             flex-shrink: 0;
         }
 
-            .tab:hover {
-                background-color: rgba(93, 92, 222, 0.1);
-            }
+        .tab:hover {
+            background-color: rgba(93, 92, 222, 0.1);
+        }
 
         .chart-container {
             height: 300px;
@@ -319,7 +291,7 @@
             overflow: hidden;
             margin-top: 10px;
         }
-
+        
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, var(--primary-color) 0%, #8584e6 100%);
@@ -327,7 +299,7 @@
             transition: width 0.3s;
             border-radius: 5px;
         }
-
+        
         /* 追蹤點選擇器 */
         .point-selector {
             position: absolute;
@@ -342,21 +314,13 @@
             box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
             animation: pulse 1.5s infinite;
         }
-
+        
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 255, 0, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 0, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); }
         }
-
+        
         .point-selector::after {
             content: "";
             position: absolute;
@@ -369,7 +333,7 @@
             transform: translate(-50%, -50%);
             box-shadow: 0 0 10px yellow;
         }
-
+        
         /* 角度疊加層 */
         .angle-overlay {
             position: absolute;
@@ -383,12 +347,12 @@
             backdrop-filter: blur(8px);
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-
+        
         .angle-value {
             font-weight: bold;
             color: var(--primary-color);
         }
-
+        
         /* 編輯滑塊 */
         .range-slider {
             position: relative;
@@ -396,39 +360,39 @@
             width: 100%;
             margin: 1.5rem 0;
         }
-
-            .range-slider .slider-track {
-                position: absolute;
-                height: 8px;
-                background: #ddd;
-                width: calc(100% - 20px);
-                margin: 0 10px;
-                top: 50%;
-                transform: translateY(-50%);
-                border-radius: 5px;
-            }
-
-            .range-slider .slider-selection {
-                position: absolute;
-                height: 100%;
-                background: var(--primary-color);
-                border-radius: 5px;
-            }
-
-            .range-slider .slider-handle {
-                position: absolute;
-                width: 24px;
-                height: 24px;
-                background: white;
-                border: 2px solid var(--primary-color);
-                border-radius: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                cursor: grab;
-                z-index: 1;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            }
-
+        
+        .range-slider .slider-track {
+            position: absolute;
+            height: 8px;
+            background: #ddd;
+            width: calc(100% - 20px);
+            margin: 0 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 5px;
+        }
+        
+        .range-slider .slider-selection {
+            position: absolute;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+        
+        .range-slider .slider-handle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
         .time-label {
             position: absolute;
             bottom: -25px;
@@ -453,43 +417,57 @@
             transform: translateY(-20px);
             transition: opacity 0.3s, transform 0.3s;
         }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.info { background-color: #3498db; }
+        .notification.success { background-color: #2ecc71; }
+        .notification.warning { background-color: #f39c12; }
+        .notification.error { background-color: #e74c3c; }
 
-            .notification.show {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* 視頻預覽區域 */
+        .video-preview {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
 
-            .notification.info {
-                background-color: #3498db;
-            }
+        .video-preview p {
+            margin: 0;
+            color: #666;
+        }
 
-            .notification.success {
-                background-color: #2ecc71;
-            }
-
-            .notification.warning {
-                background-color: #f39c12;
-            }
-
-            .notification.error {
-                background-color: #e74c3c;
-            }
+        /* 錯誤處理區 */
+        .error-display {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 8px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div id="opencvStatus" style="display:none;position:fixed;top:0;left:0;right:0;padding:8px;text-align:center;z-index:1000;background-color:#f8d7da;color:#721c24;">
         正在載入 OpenCV.js...
     </div>
-
+    
     <div id="poseNetStatus" style="display:none;position:fixed;top:0;left:0;right:0;padding:8px;text-align:center;z-index:1000;background-color:#f8d7da;color:#721c24;">
         正在載入 PoseNet...
     </div>
-
+    
     <div id="notification" class="notification"></div>
 
     <div class="app-container">
         <h1 class="text-3xl font-bold text-center mb-6">舉重影片分析工具</h1>
-
+        
         <div class="card rounded-lg shadow-md p-4 mb-6">
             <h2 class="text-xl font-semibold mb-4">上傳舉重影片</h2>
             <div class="space-y-4">
@@ -498,7 +476,14 @@
                     <input type="file" id="videoUpload" accept="video/*" class="block w-full text-base border rounded-lg cursor-pointer focus:outline-none p-2.5">
                     <p class="mt-2 text-sm text-gray-500">支援所有常見影片格式 (MP4, MOV, AVI, WEBM 等)</p>
                 </div>
-
+                
+                <div class="video-preview">
+                    <p id="uploadStatus">請上傳視頻文件</p>
+                    <video id="previewVideo" style="display:none;max-width:100%;max-height:300px;margin:10px auto;" controls></video>
+                </div>
+                
+                <div id="errorDisplay" class="error-display"></div>
+                
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <div class="w-full sm:w-1/2">
                         <label for="weightInput" class="block mb-2 text-sm font-medium">槓鈴重量 (公斤)</label>
@@ -509,24 +494,28 @@
                         <input type="number" id="athleteHeight" class="block w-full text-base border rounded-lg p-2.5" placeholder="例如: 175">
                     </div>
                 </div>
-
-                <button id="startEditingBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-base px-5 py-2.5 text-center">
+                
+                <button id="startEditingBtn" disabled class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-base px-5 py-2.5 text-center opacity-50 cursor-not-allowed">
                     預覽並編輯影片
                 </button>
+                <div id="loadingSpinner" style="display:none;text-align:center;margin-top:10px;">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="mt-2">處理視頻中...</p>
+                </div>
             </div>
         </div>
 
         <div id="editingSection" class="hidden">
             <div class="card rounded-lg shadow-md p-4 mb-6">
                 <h2 class="text-xl font-semibold mb-4">影片編輯</h2>
-
+                
                 <div class="video-container mb-8">
                     <div id="videoContainer" class="video-wrapper">
-                        <video id="editVideoPlayer" class="rounded-lg" controls></video>
+                        <video id="editVideoPlayer" class="rounded-lg" controls crossorigin="anonymous"></video>
                         <canvas id="editOverlay" class="tracking-overlay"></canvas>
                     </div>
                 </div>
-
+                
                 <div class="mb-6">
                     <h3 class="font-medium mb-2">裁剪影片時間段</h3>
                     <div class="range-slider mb-6">
@@ -537,12 +526,12 @@
                         <div id="startTimeLabel" class="time-label">0:00</div>
                         <div id="endTimeLabel" class="time-label">0:00</div>
                     </div>
-
+                    
                     <div class="text-center text-sm text-secondary mt-8">
                         <span id="currentTime">當前時間: 0:00</span> / <span id="totalTime">總時長: 0:00</span>
                     </div>
                 </div>
-
+                
                 <div class="mb-6">
                     <h3 class="font-medium mb-2">旋轉影片</h3>
                     <div class="flex items-center justify-center gap-4 flex-wrap">
@@ -556,7 +545,7 @@
                         <button id="rotateLargeRight" class="w-10 h-10 bg-blue-600 text-white rounded-full">↻</button>
                     </div>
                 </div>
-
+                
                 <div class="flex space-x-2">
                     <button id="cancelEditBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg text-sm px-4 py-2">取消</button>
                     <button id="applyEditBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2">套用變更並開始分析</button>
@@ -567,10 +556,10 @@
         <div id="analysisSection" class="hidden">
             <div class="card rounded-lg shadow-md p-4 mb-6">
                 <h2 class="text-xl font-semibold mb-4">影片分析</h2>
-
+                
                 <div class="video-container mb-4">
                     <div id="analysisVideoContainer" class="video-wrapper">
-                        <video id="videoPlayer" class="rounded-lg" controls></video>
+                        <video id="videoPlayer" class="rounded-lg" controls crossorigin="anonymous"></video>
                         <canvas id="trackingOverlay" class="tracking-overlay"></canvas>
                         <canvas id="skeletonOverlay" class="skeleton-overlay"></canvas>
                         <div id="angleOverlay" class="angle-overlay hidden">
@@ -588,7 +577,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="flex flex-wrap gap-2 mb-4">
                     <button id="selectTrackPoint" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2">選擇追蹤點</button>
                     <button id="trackBarbell" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2">開始追蹤</button>
@@ -606,7 +595,7 @@
                         <option value="liftStart">拉起槓鈴時</option>
                     </select>
                 </div>
-
+                
                 <div class="mb-4">
                     <h3 class="font-medium mb-2">選擇顯示的關節</h3>
                     <div class="flex flex-wrap gap-3">
@@ -633,37 +622,37 @@
                     <div class="tab" data-tab="angles">角度分析</div>
                     <div class="tab" data-tab="metrics">其他指標</div>
                 </div>
-
+                
                 <div id="trajectoryTab" class="tab-content">
                     <div class="chart-container">
                         <canvas id="trajectoryCanvas"></canvas>
                     </div>
                 </div>
-
+                
                 <div id="velocityTab" class="tab-content hidden">
                     <div class="chart-container">
                         <canvas id="velocityChart"></canvas>
                     </div>
                 </div>
-
+                
                 <div id="powerTab" class="tab-content hidden">
                     <div class="chart-container">
                         <canvas id="powerChart"></canvas>
                     </div>
                 </div>
-
+                
                 <div id="displacementTab" class="tab-content hidden">
                     <div class="chart-container">
                         <canvas id="displacementChart"></canvas>
                     </div>
                 </div>
-
+                
                 <div id="anglesTab" class="tab-content hidden">
                     <div class="chart-container">
                         <canvas id="anglesChart"></canvas>
                     </div>
                 </div>
-
+                
                 <div id="metricsTab" class="tab-content hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div class="p-4 border rounded-lg">
@@ -688,16 +677,23 @@
 
             <div class="card rounded-lg shadow-md p-4 mb-6">
                 <h2 class="text-xl font-semibold mb-4">影片比較</h2>
-
+                
                 <div class="mb-4">
                     <label for="compareVideoUpload" class="block mb-2 text-sm font-medium">上傳比較影片</label>
                     <input type="file" id="compareVideoUpload" accept="video/*" class="block w-full text-base border rounded-lg cursor-pointer focus:outline-none p-2.5">
                 </div>
-
+                
+                <div class="video-preview">
+                    <p id="compareUploadStatus">請上傳比較視頻文件</p>
+                    <video id="previewCompareVideo" style="display:none;max-width:100%;max-height:300px;margin:10px auto;" controls></video>
+                </div>
+                
+                <div id="compareErrorDisplay" class="error-display"></div>
+                
                 <div id="compareContainer" class="hidden">
                     <div class="video-container mb-4">
                         <div class="video-wrapper">
-                            <video id="compareVideoPlayer" class="rounded-lg" controls></video>
+                            <video id="compareVideoPlayer" class="rounded-lg" controls crossorigin="anonymous"></video>
                             <canvas id="compareOverlay" class="tracking-overlay"></canvas>
                             <canvas id="compareSkeletonOverlay" class="skeleton-overlay"></canvas>
                             <div id="compareAngleOverlay" class="angle-overlay hidden">
@@ -715,7 +711,7 @@
                             </div>
                         </div>
                     </div>
-
+                    
                     <div class="flex flex-wrap gap-2 mb-4">
                         <button id="selectCompareTrackPoint" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2">選擇追蹤點</button>
                         <button id="trackCompare" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2">開始追蹤</button>
@@ -733,12 +729,12 @@
                             <option value="liftStart">拉起槓鈴時</option>
                         </select>
                     </div>
-
+                    
                     <div class="mb-4">
                         <label for="opacitySlider" class="block mb-2 text-sm font-medium">調整重疊透明度</label>
                         <input type="range" id="opacitySlider" class="w-full h-2 bg-gray-200 rounded-lg appearance-none" min="0" max="100" value="50">
                     </div>
-
+                    
                     <div class="mb-4">
                         <label for="syncPoint" class="block mb-2 text-sm font-medium">選擇同步點</label>
                         <select id="syncPoint" class="block w-full text-base border rounded-lg p-2.5">
@@ -750,11 +746,11 @@
                             <option value="catch">接槓點</option>
                         </select>
                     </div>
-
+                    
                     <button id="syncVideos" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-base px-5 py-2.5 text-center mb-4">
                         同步比較影片
                     </button>
-
+                    
                     <div class="tab-container" id="comparisonTabs">
                         <div class="tab active" data-tab="trajectoryCompare">軌跡比較</div>
                         <div class="tab" data-tab="velocityCompare">速度比較</div>
@@ -762,31 +758,31 @@
                         <div class="tab" data-tab="displacementCompare">位移比較</div>
                         <div class="tab" data-tab="anglesCompare">角度比較</div>
                     </div>
-
+                    
                     <div id="trajectoryCompareTab" class="tab-content">
                         <div class="chart-container">
                             <canvas id="trajectoryCompareCanvas"></canvas>
                         </div>
                     </div>
-
+                    
                     <div id="velocityCompareTab" class="tab-content hidden">
                         <div class="chart-container">
                             <canvas id="velocityCompareChart"></canvas>
                         </div>
                     </div>
-
+                    
                     <div id="powerCompareTab" class="tab-content hidden">
                         <div class="chart-container">
                             <canvas id="powerCompareChart"></canvas>
                         </div>
                     </div>
-
+                    
                     <div id="displacementCompareTab" class="tab-content hidden">
                         <div class="chart-container">
                             <canvas id="displacementCompareChart"></canvas>
                         </div>
                     </div>
-
+                    
                     <div id="anglesCompareTab" class="tab-content hidden">
                         <div class="chart-container">
                             <canvas id="anglesCompareChart"></canvas>
@@ -797,11 +793,14 @@
         </div>
     </div>
 
-    <script>// 全域變數
+    <script>
+        // 全域變數
         let opencvReady = false;
         let poseNetReady = false;
         let poseNetModel = null;
         let poseNetAllowed = true; // 自動允許PoseNet
+        let defaultVideoWidth = 640;
+        let defaultVideoHeight = 480;
 
         // 主要數據儲存
         const analysisData = {
@@ -826,7 +825,7 @@
                 liftStart: -1
             }
         };
-
+        
         const compareData = {
             trajectoryPoints: [],
             velocityData: [],
@@ -857,7 +856,7 @@
             rotationAngle: 0,
             videoBlob: null
         };
-
+        
         // 追蹤參數
         const trackingParams = {
             isTracking: false,
@@ -876,7 +875,7 @@
                 elbow: true
             }
         };
-
+        
         const compareTrackingParams = {
             isTracking: false,
             trackPoint: { x: 0, y: 0 },
@@ -905,7 +904,7 @@
         let powerCompareChartInstance = null;
         let displacementCompareChartInstance = null;
         let anglesCompareChartInstance = null;
-
+        
         // OpenCV 加載狀態
         function onOpenCvReady() {
             console.log("OpenCV.js已載入！");
@@ -915,24 +914,24 @@
             statusDiv.style.display = "block";
             statusDiv.style.backgroundColor = "#d4edda";
             statusDiv.style.color = "#155724";
-
+            
             setTimeout(() => {
                 statusDiv.style.display = "none";
             }, 3000);
         }
-
+        
         function onOpenCvError() {
             console.error("OpenCV.js載入失敗！");
             showNotification("無法載入OpenCV.js，請檢查網絡連接", "error");
         }
-
+        
         // PoseNet 初始化
         async function initPoseNetModel() {
             try {
                 const statusDiv = document.getElementById('poseNetStatus');
                 statusDiv.textContent = "正在載入 PoseNet...";
                 statusDiv.style.display = "block";
-
+                
                 // 直接加載模型，無需確認
                 poseNetModel = await posenet.load({
                     architecture: 'MobileNetV1',
@@ -945,11 +944,11 @@
                 statusDiv.textContent = "PoseNet 已成功載入";
                 statusDiv.style.backgroundColor = "#d4edda";
                 statusDiv.style.color = "#155724";
-
+                
                 setTimeout(() => {
                     statusDiv.style.display = "none";
                 }, 3000);
-
+                
                 console.log("PoseNet model loaded");
             } catch (error) {
                 console.error("PoseNet loading error:", error);
@@ -963,23 +962,30 @@
             notification.textContent = message;
             notification.className = 'notification ' + type;
             notification.classList.add('show');
-
+            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+            
+            console.log(`[${type}] ${message}`); // 同時添加控制台日誌
         }
-
+        
         // DOM 元素
         const videoUpload = document.getElementById('videoUpload');
+        const previewVideo = document.getElementById('previewVideo');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        
         const weightInput = document.getElementById('weightInput');
         const athleteHeight = document.getElementById('athleteHeight');
         const startEditingBtn = document.getElementById('startEditingBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
         const applyEditBtn = document.getElementById('applyEditBtn');
-
+        
         const editingSection = document.getElementById('editingSection');
         const analysisSection = document.getElementById('analysisSection');
-
+        
         const videoContainer = document.getElementById('videoContainer');
         const editVideoPlayer = document.getElementById('editVideoPlayer');
         const editOverlay = document.getElementById('editOverlay');
@@ -995,7 +1001,7 @@
         const rotateLeft = document.getElementById('rotateLeft');
         const rotateRight = document.getElementById('rotateRight');
         const rotationAngleInput = document.getElementById('rotationAngleInput');
-
+        
         const analysisVideoContainer = document.getElementById('analysisVideoContainer');
         const videoPlayer = document.getElementById('videoPlayer');
         const trackingOverlay = document.getElementById('trackingOverlay');
@@ -1004,7 +1010,7 @@
         const pointSelector = document.getElementById('pointSelector');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const analysisProgress = document.getElementById('analysisProgress');
-
+        
         const selectTrackPoint = document.getElementById('selectTrackPoint');
         const trackBarbell = document.getElementById('trackBarbell');
         const stopTracking = document.getElementById('stopTracking');
@@ -1013,26 +1019,30 @@
         const toggleAngles = document.getElementById('toggleAngles');
         const markKeyPoint = document.getElementById('markKeyPoint');
         const keyPointType = document.getElementById('keyPointType');
-
+        
         const kneeAngle = document.getElementById('kneeAngle');
         const hipAngle = document.getElementById('hipAngle');
         const shoulderAngle = document.getElementById('shoulderAngle');
         const elbowAngle = document.getElementById('elbowAngle');
-
+        
         const jointCheckboxes = document.querySelectorAll('.joint-checkbox');
-
+        
         const trajectoryCanvas = document.getElementById('trajectoryCanvas');
         const velocityChart = document.getElementById('velocityChart');
         const powerChart = document.getElementById('powerChart');
         const displacementChart = document.getElementById('displacementChart');
         const anglesChart = document.getElementById('anglesChart');
-
+        
         const maxHeight = document.getElementById('maxHeight');
         const liftEfficiency = document.getElementById('liftEfficiency');
         const maxVelocity = document.getElementById('maxVelocity');
         const maxPower = document.getElementById('maxPower');
-
+        
         const compareVideoUpload = document.getElementById('compareVideoUpload');
+        const previewCompareVideo = document.getElementById('previewCompareVideo');
+        const compareUploadStatus = document.getElementById('compareUploadStatus');
+        const compareErrorDisplay = document.getElementById('compareErrorDisplay');
+        
         const compareContainer = document.getElementById('compareContainer');
         const compareVideoPlayer = document.getElementById('compareVideoPlayer');
         const compareOverlay = document.getElementById('compareOverlay');
@@ -1041,7 +1051,7 @@
         const comparePointSelector = document.getElementById('comparePointSelector');
         const compareLoadingIndicator = document.getElementById('compareLoadingIndicator');
         const compareProgress = document.getElementById('compareProgress');
-
+        
         const selectCompareTrackPoint = document.getElementById('selectCompareTrackPoint');
         const trackCompare = document.getElementById('trackCompare');
         const stopCompareTracking = document.getElementById('stopCompareTracking');
@@ -1050,237 +1060,367 @@
         const toggleCompareAngles = document.getElementById('toggleCompareAngles');
         const markCompareKeyPoint = document.getElementById('markCompareKeyPoint');
         const compareKeyPointType = document.getElementById('compareKeyPointType');
-
+        
         const compareKneeAngle = document.getElementById('compareKneeAngle');
         const compareHipAngle = document.getElementById('compareHipAngle');
         const compareShoulderAngle = document.getElementById('compareShoulderAngle');
         const compareElbowAngle = document.getElementById('compareElbowAngle');
-
+        
         const opacitySlider = document.getElementById('opacitySlider');
         const syncPoint = document.getElementById('syncPoint');
         const syncVideos = document.getElementById('syncVideos');
-
+        
         const trajectoryCompareCanvas = document.getElementById('trajectoryCompareCanvas');
         const velocityCompareChart = document.getElementById('velocityCompareChart');
         const powerCompareChart = document.getElementById('powerCompareChart');
         const displacementCompareChart = document.getElementById('displacementCompareChart');
         const anglesCompareChart = document.getElementById('anglesCompareChart');
-
+        
         // 影片上傳處理
-        videoUpload.addEventListener('change', function(e) {
+        videoUpload.addEventListener('change', async function(e) {
             const file = e.target.files[0];
-            if (file) {
-                try {
-                    // 建立視頻URL
-                    const videoURL = URL.createObjectURL(file);
-
-                    // 設置視頻源
-                    editVideoPlayer.src = videoURL;
-
-                    // 保存文件引用
-                    editParams.videoBlob = file;
-
-                    // 確保視頻元素尺寸正確設置
-                    editVideoPlayer.onloadedmetadata = function() {
-                        console.log("Video loaded, dimensions:", editVideoPlayer.videoWidth, "x", editVideoPlayer.videoHeight);
-
-                        // 設置 Canvas 尺寸與影片相同
-                        editOverlay.width = editVideoPlayer.videoWidth;
-                        editOverlay.height = editVideoPlayer.videoHeight;
-
-                        // 初始化時間滑塊
-                        initTimeSlider();
+            if (!file) return;
+            
+            // 重置之前的錯誤
+            errorDisplay.style.display = 'none';
+            errorDisplay.textContent = '';
+            uploadStatus.textContent = '正在處理影片...';
+            loadingSpinner.style.display = 'block';
+            startEditingBtn.disabled = true;
+            startEditingBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            try {
+                // 創建視頻URL
+                const videoURL = URL.createObjectURL(file);
+                
+                // 保存文件引用
+                editParams.videoBlob = file;
+                
+                // 設置預覽視頻源
+                previewVideo.src = videoURL;
+                previewVideo.style.display = 'block';
+                
+                // 處理MOV文件的特殊情況
+                const isMovFile = file.name.toLowerCase().endsWith('.mov');
+                
+                // 等待影片元數據加載
+                await new Promise((resolve, reject) => {
+                    const onMetadataLoaded = () => {
+                        previewVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                        previewVideo.removeEventListener('error', onError);
+                        resolve();
                     };
-
-                    // 加載成功提示
-                    showNotification(`已成功載入影片: ${file.name}`, 'success');
-                } catch (error) {
-                    console.error("Error loading video:", error);
-                    showNotification("無法載入視頻檔案，請重試", 'error');
+                    
+                    const onError = (err) => {
+                        previewVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                        previewVideo.removeEventListener('error', onError);
+                        reject(err);
+                    };
+                    
+                    previewVideo.addEventListener('loadedmetadata', onMetadataLoaded);
+                    previewVideo.addEventListener('error', onError);
+                    
+                    // 強制加載
+                    previewVideo.load();
+                });
+                
+                console.log("Video metadata loaded, dimensions:", previewVideo.videoWidth, "x", previewVideo.videoHeight);
+                
+                // 檢查視頻尺寸
+                if (previewVideo.videoWidth === 0 || previewVideo.videoHeight === 0) {
+                    // 對於MOV文件，使用默認尺寸
+                    if (isMovFile) {
+                        console.log("MOV file detected with zero dimensions, using default size");
+                        // 設置默認尺寸來處理MOV文件
+                        previewVideo.width = defaultVideoWidth;
+                        previewVideo.height = defaultVideoHeight;
+                        uploadStatus.textContent = `已加載影片: ${file.name} (使用默認尺寸 ${defaultVideoWidth}x${defaultVideoHeight})`;
+                    } else {
+                        throw new Error("影片元數據載入失敗，無法獲取尺寸");
+                    }
+                } else {
+                    // 視頻尺寸正常，顯示實際尺寸
+                    uploadStatus.textContent = `已加載影片: ${file.name} (${previewVideo.videoWidth}x${previewVideo.videoHeight})`;
                 }
+                
+                // 啟用編輯按鈕
+                startEditingBtn.disabled = false;
+                startEditingBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                loadingSpinner.style.display = 'none';
+                showNotification(`已成功載入影片: ${file.name}`, 'success');
+            } catch (error) {
+                console.error("Error loading video:", error);
+                errorDisplay.textContent = `錯誤: ${error.message || '無法載入視頻文件'}`;
+                errorDisplay.style.display = 'block';
+                uploadStatus.textContent = '載入失敗，請嘗試其他格式的視頻';
+                loadingSpinner.style.display = 'none';
+                showNotification("無法載入視頻檔案，請嘗試其他格式", 'error');
             }
         });
-
-        compareVideoUpload.addEventListener('change', function(e) {
+        
+        compareVideoUpload.addEventListener('change', async function(e) {
             const file = e.target.files[0];
-            if (file) {
-                try {
-                    // 建立視頻URL
-                    const videoURL = URL.createObjectURL(file);
-
-                    // 設置視頻源
-                    compareVideoPlayer.src = videoURL;
-                    compareContainer.classList.remove('hidden');
-
-                    // 確保視頻元素尺寸正確設置
-                    compareVideoPlayer.onloadedmetadata = function() {
-                        console.log("Compare video loaded, dimensions:", compareVideoPlayer.videoWidth, "x", compareVideoPlayer.videoHeight);
-
-                        compareOverlay.width = compareVideoPlayer.videoWidth;
-                        compareOverlay.height = compareVideoPlayer.videoHeight;
-                        compareSkeletonOverlay.width = compareVideoPlayer.videoWidth;
-                        compareSkeletonOverlay.height = compareVideoPlayer.videoHeight;
+            if (!file) return;
+            
+            // 重置之前的錯誤
+            compareErrorDisplay.style.display = 'none';
+            compareErrorDisplay.textContent = '';
+            compareUploadStatus.textContent = '正在處理比較影片...';
+            
+            try {
+                // 創建視頻URL
+                const videoURL = URL.createObjectURL(file);
+                
+                // 設置預覽視頻源
+                previewCompareVideo.src = videoURL;
+                previewCompareVideo.style.display = 'block';
+                
+                // 處理MOV文件的特殊情況
+                const isMovFile = file.name.toLowerCase().endsWith('.mov');
+                
+                // 等待影片元數據加載
+                await new Promise((resolve, reject) => {
+                    const onMetadataLoaded = () => {
+                        previewCompareVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                        previewCompareVideo.removeEventListener('error', onError);
+                        resolve();
                     };
-
-                    // 加載成功提示
-                    showNotification(`已成功載入比較影片: ${file.name}`, 'success');
-                } catch (error) {
-                    console.error("Error loading compare video:", error);
-                    showNotification("無法載入比較視頻檔案", 'error');
+                    
+                    const onError = (err) => {
+                        previewCompareVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                        previewCompareVideo.removeEventListener('error', onError);
+                        reject(err);
+                    };
+                    
+                    previewCompareVideo.addEventListener('loadedmetadata', onMetadataLoaded);
+                    previewCompareVideo.addEventListener('error', onError);
+                    
+                    // 強制加載
+                    previewCompareVideo.load();
+                });
+                
+                console.log("Compare video metadata loaded, dimensions:", previewCompareVideo.videoWidth, "x", previewCompareVideo.videoHeight);
+                
+                // 檢查視頻尺寸
+                if (previewCompareVideo.videoWidth === 0 || previewCompareVideo.videoHeight === 0) {
+                    // 對於MOV文件，使用默認尺寸
+                    if (isMovFile) {
+                        console.log("MOV file detected with zero dimensions, using default size");
+                        // 設置默認尺寸來處理MOV文件
+                        previewCompareVideo.width = defaultVideoWidth;
+                        previewCompareVideo.height = defaultVideoHeight;
+                        compareUploadStatus.textContent = `已加載比較影片: ${file.name} (使用默認尺寸 ${defaultVideoWidth}x${defaultVideoHeight})`;
+                    } else {
+                        throw new Error("比較影片元數據載入失敗，無法獲取尺寸");
+                    }
+                } else {
+                    // 視頻尺寸正常，顯示實際尺寸
+                    compareUploadStatus.textContent = `已加載比較影片: ${file.name} (${previewCompareVideo.videoWidth}x${previewCompareVideo.videoHeight})`;
                 }
+                
+                // 顯示比較容器
+                compareContainer.classList.remove('hidden');
+                
+                // 設置比較視頻源
+                compareVideoPlayer.src = videoURL;
+                
+                // 設置比較視頻Canvas尺寸
+                compareVideoPlayer.onloadedmetadata = function() {
+                    // 使用實際尺寸或默認尺寸
+                    const width = compareVideoPlayer.videoWidth || defaultVideoWidth;
+                    const height = compareVideoPlayer.videoHeight || defaultVideoHeight;
+                    
+                    compareOverlay.width = width;
+                    compareOverlay.height = height;
+                    compareSkeletonOverlay.width = width;
+                    compareSkeletonOverlay.height = height;
+                    
+                    console.log("Compare canvas dimensions set to:", width, "x", height);
+                };
+                
+                showNotification(`已成功載入比較影片: ${file.name}`, 'success');
+            } catch (error) {
+                console.error("Error loading compare video:", error);
+                compareErrorDisplay.textContent = `錯誤: ${error.message || '無法載入比較視頻文件'}`;
+                compareErrorDisplay.style.display = 'block';
+                compareUploadStatus.textContent = '載入失敗，請嘗試其他格式的視頻';
+                showNotification("無法載入比較視頻檔案，請嘗試其他格式", 'error');
             }
         });
-
+        
         // 預覽和編輯按鈕
         startEditingBtn.addEventListener('click', function() {
-            if (!editVideoPlayer.src) {
+            if (!previewVideo.src) {
                 showNotification('請先上傳影片', 'warning');
                 return;
             }
-
+            
+            // 設置編輯視頻播放器
+            editVideoPlayer.src = previewVideo.src;
+            
+            // 確保視頻尺寸適配
+            const videoWidth = previewVideo.videoWidth || defaultVideoWidth;
+            const videoHeight = previewVideo.videoHeight || defaultVideoHeight;
+            
+            // 設置 Canvas 尺寸
+            editOverlay.width = videoWidth;
+            editOverlay.height = videoHeight;
+            
+            console.log("Edit canvas dimensions set to:", videoWidth, "x", videoHeight);
+            
+            // 顯示編輯部分
             editingSection.classList.remove('hidden');
-            analysisSection.classList.add('hidden');
+            
+            // 當元數據載入後設置時間滑塊
+            editVideoPlayer.onloadedmetadata = function() {
+                // 初始化時間滑塊
+                initTimeSlider();
+            };
+            
+            // 加載視頻
+            editVideoPlayer.load();
         });
-
+        
         // 初始化時間滑塊
         function initTimeSlider() {
             const duration = editVideoPlayer.duration;
-
+            
             // 初始化起始和結束時間
             editParams.startTime = 0;
             editParams.endTime = duration;
-
+            
             // 設置顯示
             startTimeLabel.textContent = formatTime(0);
             endTimeLabel.textContent = formatTime(duration);
             totalTime.textContent = `總時長: ${formatTime(duration)}`;
-
+            
             // 設置滑塊位置
             positionTimeHandles();
-
+            
             // 設置滑塊選擇區域
             updateTimeSelection();
-
+            
             // 添加拖動滑塊的事件處理
             setupDragHandles();
-
+            
             // 更新當前時間顯示
             editVideoPlayer.addEventListener('timeupdate', function() {
                 currentTime.textContent = `當前時間: ${formatTime(editVideoPlayer.currentTime)}`;
             });
         }
-
+        
         // 格式化時間顯示 (秒 -> mm:ss)
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
-
+        
         // 設置滑塊位置
         function positionTimeHandles() {
             const duration = editVideoPlayer.duration;
             const startPercent = (editParams.startTime / duration) * 100;
             const endPercent = (editParams.endTime / duration) * 100;
-
+            
             // 設置滑塊位置
             startTimeHandle.style.left = `${startPercent}%`;
             endTimeHandle.style.left = `${endPercent}%`;
-
+            
             // 更新時間標籤位置
             startTimeLabel.style.left = `${startPercent}%`;
             endTimeLabel.style.left = `${endPercent}%`;
         }
-
+        
         // 更新時間選擇區域
         function updateTimeSelection() {
             const duration = editVideoPlayer.duration;
             const startPercent = (editParams.startTime / duration) * 100;
             const endPercent = (editParams.endTime / duration) * 100;
-
+            
             timeSliderSelection.style.left = `${startPercent}%`;
             timeSliderSelection.style.width = `${endPercent - startPercent}%`;
         }
-
+        
         // 設置滑塊拖動功能
         function setupDragHandles() {
             let isDraggingStart = false;
             let isDraggingEnd = false;
-
+            
             // 滑鼠按下
             startTimeHandle.addEventListener('mousedown', function(e) {
                 isDraggingStart = true;
                 e.preventDefault();
             });
-
+            
             endTimeHandle.addEventListener('mousedown', function(e) {
                 isDraggingEnd = true;
                 e.preventDefault();
             });
-
+            
             // 滑鼠移動
             document.addEventListener('mousemove', function(e) {
                 if (!isDraggingStart && !isDraggingEnd) return;
-
+                
                 const track = document.querySelector('.slider-track');
                 const trackRect = track.getBoundingClientRect();
                 const clickX = e.clientX - trackRect.left;
                 const duration = editVideoPlayer.duration;
-
+                
                 // 計算時間位置 (0-1 範圍)
                 let percent = Math.max(0, Math.min(1, clickX / trackRect.width));
                 let time = percent * duration;
-
+                
                 if (isDraggingStart) {
                     // 確保起始時間不超過結束時間
                     editParams.startTime = Math.min(time, editParams.endTime - 0.5);
                     startTimeLabel.textContent = formatTime(editParams.startTime);
-
+                    
                     // 設置影片當前時間
                     editVideoPlayer.currentTime = editParams.startTime;
                 } else if (isDraggingEnd) {
                     // 確保結束時間不小於起始時間
                     editParams.endTime = Math.max(time, editParams.startTime + 0.5);
                     endTimeLabel.textContent = formatTime(editParams.endTime);
-
+                    
                     // 設置影片當前時間
                     editVideoPlayer.currentTime = editParams.endTime;
                 }
-
+                
                 // 更新滑塊位置和選擇區域
                 positionTimeHandles();
                 updateTimeSelection();
             });
-
+            
             // 滑鼠釋放
             document.addEventListener('mouseup', function() {
                 isDraggingStart = false;
                 isDraggingEnd = false;
             });
-
+            
             // 觸控支持
             startTimeHandle.addEventListener('touchstart', e => {
                 isDraggingStart = true;
                 e.preventDefault();
             });
-
+            
             endTimeHandle.addEventListener('touchstart', e => {
                 isDraggingEnd = true;
                 e.preventDefault();
             });
-
+            
             document.addEventListener('touchmove', e => {
                 if (!isDraggingStart && !isDraggingEnd) return;
-
+                
                 const touch = e.touches[0];
                 const track = document.querySelector('.slider-track');
                 const trackRect = track.getBoundingClientRect();
                 const clickX = touch.clientX - trackRect.left;
                 const duration = editVideoPlayer.duration;
-
+                
                 let percent = Math.max(0, Math.min(1, clickX / trackRect.width));
                 let time = percent * duration;
-
+                
                 if (isDraggingStart) {
                     editParams.startTime = Math.min(time, editParams.endTime - 0.5);
                     startTimeLabel.textContent = formatTime(editParams.startTime);
@@ -1290,38 +1430,38 @@
                     endTimeLabel.textContent = formatTime(editParams.endTime);
                     editVideoPlayer.currentTime = editParams.endTime;
                 }
-
+                
                 positionTimeHandles();
                 updateTimeSelection();
             });
-
+            
             document.addEventListener('touchend', () => {
                 isDraggingStart = false;
                 isDraggingEnd = false;
             });
         }
-
+        
         // 旋轉按鈕
         rotateLargeLeft.addEventListener('click', function() {
             editParams.rotationAngle = (editParams.rotationAngle - 90) % 360;
             updateRotationDisplay();
         });
-
+        
         rotateLargeRight.addEventListener('click', function() {
             editParams.rotationAngle = (editParams.rotationAngle + 90) % 360;
             updateRotationDisplay();
         });
-
+        
         rotateLeft.addEventListener('click', function() {
             editParams.rotationAngle = (editParams.rotationAngle - 1) % 360;
             updateRotationDisplay();
         });
-
+        
         rotateRight.addEventListener('click', function() {
             editParams.rotationAngle = (editParams.rotationAngle + 1) % 360;
             updateRotationDisplay();
         });
-
+        
         // 旋轉角度輸入框處理
         rotationAngleInput.addEventListener('input', function() {
             let angle = parseInt(this.value) || 0;
@@ -1330,77 +1470,101 @@
             this.value = angle;
             updateRotationDisplay();
         });
-
+        
         // 更新旋轉角度顯示
         function updateRotationDisplay() {
             rotationAngleInput.value = editParams.rotationAngle;
-
+            
             // 旋轉預覽影片和容器
             editVideoPlayer.style.transform = `rotate(${editParams.rotationAngle}deg)`;
             editOverlay.style.transform = `rotate(${editParams.rotationAngle}deg)`;
+            
+            // 調整容器尺寸以適應旋轉
+            adjustVideoContainerForRotation(videoContainer, editVideoPlayer, editParams.rotationAngle);
         }
-
+        
+        // 調整視頻容器以適應旋轉
+        function adjustVideoContainerForRotation(container, videoElem, angle) {
+            // 對於90度或270度的旋轉，需要調整容器尺寸
+            if (Math.abs(angle % 180) === 90) {
+                const videoWidth = videoElem.videoWidth || defaultVideoWidth;
+                const videoHeight = videoElem.videoHeight || defaultVideoHeight;
+                const aspectRatio = videoWidth / videoHeight;
+                
+                // 旋轉90/270度時，寬高比需要倒置
+                container.style.aspectRatio = `${1/aspectRatio}`;
+            } else {
+                // 對於0度或180度，使用原始尺寸
+                container.style.aspectRatio = '';
+            }
+        }
+        
         // 取消編輯
         cancelEditBtn.addEventListener('click', function() {
             editingSection.classList.add('hidden');
-
+            
             // 重置編輯參數
             editParams.startTime = 0;
             editParams.endTime = editVideoPlayer.duration;
             editParams.rotationAngle = 0;
-
+            
             // 重置顯示
             editVideoPlayer.style.transform = 'rotate(0deg)';
             editOverlay.style.transform = 'rotate(0deg)';
+            videoContainer.style.aspectRatio = '';
         });
-
+        
         // 應用編輯更改並開始分析
         applyEditBtn.addEventListener('click', function() {
             if (!editVideoPlayer.src) {
                 showNotification('請先上傳影片', 'warning');
                 return;
             }
-
+            
             // 隱藏編輯部分，顯示分析部分
             editingSection.classList.add('hidden');
             analysisSection.classList.remove('hidden');
-
+            
             // 顯示處理提示
             showNotification("正在處理影片...", "info");
-
+            
             // 處理視頻
             processVideo();
         });
-
+        
         // 處理視頻
         function processVideo() {
             try {
-                // 使用原始Blob創建URL
-                const videoURL = URL.createObjectURL(editParams.videoBlob);
-
-                // 設置視頻源
-                videoPlayer.src = videoURL;
-
+                // 設置視頻源 (使用與編輯視頻相同的源)
+                videoPlayer.src = editVideoPlayer.src;
+                
                 // 當視頻元數據載入後
                 videoPlayer.onloadedmetadata = function() {
-                    console.log("Analysis video loaded, dimensions:", videoPlayer.videoWidth, "x", videoPlayer.videoHeight);
-
                     // 設置Canvas尺寸
-                    trackingOverlay.width = videoPlayer.videoWidth;
-                    trackingOverlay.height = videoPlayer.videoHeight;
-                    skeletonOverlay.width = videoPlayer.videoWidth;
-                    skeletonOverlay.height = videoPlayer.videoHeight;
-
+                    // 使用實際尺寸或默認尺寸
+                    const videoWidth = videoPlayer.videoWidth || defaultVideoWidth;
+                    const videoHeight = videoPlayer.videoHeight || defaultVideoHeight;
+                    
+                    console.log("Analysis video dimensions:", videoWidth, "x", videoHeight);
+                    
+                    trackingOverlay.width = videoWidth;
+                    trackingOverlay.height = videoHeight;
+                    skeletonOverlay.width = videoWidth;
+                    skeletonOverlay.height = videoHeight;
+                    
                     // 應用旋轉
                     if (editParams.rotationAngle !== 0) {
                         videoPlayer.style.transform = `rotate(${editParams.rotationAngle}deg)`;
                         trackingOverlay.style.transform = `rotate(${editParams.rotationAngle}deg)`;
                         skeletonOverlay.style.transform = `rotate(${editParams.rotationAngle}deg)`;
+                        
+                        // 調整容器尺寸以適應旋轉
+                        adjustVideoContainerForRotation(analysisVideoContainer, videoPlayer, editParams.rotationAngle);
                     }
-
+                    
                     // 設置視頻開始時間
                     videoPlayer.currentTime = editParams.startTime;
-
+                    
                     // 添加時間更新處理器，確保視頻在結束時間停止
                     videoPlayer.addEventListener('timeupdate', function timeEndHandler() {
                         if (videoPlayer.currentTime >= editParams.endTime) {
@@ -1411,106 +1575,114 @@
                             }
                         }
                     });
-
+                    
                     // 成功提示
                     showNotification("影片處理完成", "success");
-
+                    
                     // 播放視頻
                     videoPlayer.play();
                 };
-
+                
                 videoPlayer.load();
             } catch (error) {
                 console.error("處理視頻時出錯:", error);
                 showNotification("處理視頻時出錯，請重試", "error");
             }
         }
-
+        
         // 選擇追蹤點
         selectTrackPoint.addEventListener('click', function() {
             if (!videoPlayer.src) {
                 showNotification('請先上傳並處理影片', 'warning');
                 return;
             }
-
+            
             // 顯示點選擇器
             pointSelector.style.display = 'block';
             trackingParams.isPointSelected = false;
-
+            
             // 顯示提示
             showNotification("請點擊視頻中要追蹤的槓鈴位置", "info");
         });
-
+        
         // 點擊視頻選擇追蹤點
         videoPlayer.addEventListener('click', function(e) {
             if (pointSelector.style.display === 'block') {
                 const rect = videoPlayer.getBoundingClientRect();
-                const scaleX = videoPlayer.videoWidth / rect.width;
-                const scaleY = videoPlayer.videoHeight / rect.height;
-
-                // 計算點擊位置
+                
+                // 獲取視頻實際尺寸
+                const videoWidth = videoPlayer.videoWidth || defaultVideoWidth;
+                const videoHeight = videoPlayer.videoHeight || defaultVideoHeight;
+                
+                // 計算縮放比例
+                const scaleX = videoWidth / rect.width;
+                const scaleY = videoHeight / rect.height;
+                
+                // 計算點擊位置 (考慮視頻可能不是全尺寸顯示)
                 const x = (e.clientX - rect.left) * scaleX;
                 const y = (e.clientY - rect.top) * scaleY;
-
+                
+                console.log("Track point selected at:", x, y, "with scale:", scaleX, scaleY);
+                
                 // 保存追蹤點
                 trackingParams.trackPoint = { x, y };
                 trackingParams.isPointSelected = true;
-
+                
                 // 更新顯示點選擇器位置
                 pointSelector.style.left = `${e.clientX}px`;
                 pointSelector.style.top = `${e.clientY}px`;
-
+                
                 // 閃爍效果
                 setTimeout(() => {
                     pointSelector.style.display = 'none';
-
+                    
                     // 繪製追蹤點
                     const ctx = trackingOverlay.getContext('2d');
                     ctx.clearRect(0, 0, trackingOverlay.width, trackingOverlay.height);
-
+                    
                     ctx.beginPath();
                     ctx.arc(x, y, 12, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
                     ctx.fill();
-
+                    
                     // 標記中心點
                     ctx.beginPath();
                     ctx.arc(x, y, 3, 0, Math.PI * 2);
                     ctx.fillStyle = 'yellow';
                     ctx.fill();
-
+                    
                     // 顯示標記關鍵點按鈕
                     markKeyPoint.classList.remove('hidden');
                     keyPointType.classList.remove('hidden');
                 }, 1000);
-
+                
                 showNotification("已選擇追蹤點", "success");
             }
         });
-
+        
         // 開始追蹤槓鈴
         trackBarbell.addEventListener('click', async function() {
             if (!videoPlayer.src) {
                 showNotification('請先上傳影片', 'warning');
                 return;
             }
-
+            
             if (!trackingParams.isPointSelected) {
                 showNotification('請先選擇要追蹤的槓鈴位置', 'warning');
                 return;
             }
-
+            
             if (!opencvReady) {
                 showNotification('OpenCV.js 尚未準備好，請稍候...', 'warning');
                 return;
             }
-
+            
             // 更新 UI
             trackBarbell.classList.add('hidden');
             stopTracking.classList.remove('hidden');
             loadingIndicator.classList.remove('hidden');
             analysisProgress.style.width = "0%";
-
+            
             // 清空之前的數據
             analysisData.trajectoryPoints = [];
             analysisData.velocityData = [];
@@ -1524,78 +1696,86 @@
                 shoulder: [],
                 elbow: []
             };
-
+            
             // 計算顏色範圍
             calculateColorRange(videoPlayer, trackingParams);
-
+            
             // 準備影片以進行逐幀處理
             videoPlayer.currentTime = editParams.startTime;
             videoPlayer.pause();
-
+            
             // 顯示開始追蹤消息
             showNotification("開始槓鈴追蹤...", "info");
-
+            
             // 開始逐幀處理
             await processAllFrames();
         });
-
+        
         // 計算顏色範圍
         function calculateColorRange(videoElem, params) {
             if (!opencvReady) {
                 showNotification("OpenCV 尚未準備好", "error");
                 return;
             }
-
+            
             try {
                 // 建立一個臨時 canvas 來處理視頻幀
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-
-                canvas.width = videoElem.videoWidth;
-                canvas.height = videoElem.videoHeight;
-
+                
+                // 使用視頻的實際尺寸或默認尺寸
+                const width = videoElem.videoWidth || defaultVideoWidth;
+                const height = videoElem.videoHeight || defaultVideoHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
                 // 繪製當前視頻幀
                 ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-
+                
                 // 獲取像素數據
                 const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
+                
                 // 轉換為 OpenCV Mat
                 const src = cv.matFromImageData(imgData);
-
+                
                 // 計算感興趣區域 (ROI)
                 const x = Math.max(0, Math.floor(params.trackPoint.x - 15));
                 const y = Math.max(0, Math.floor(params.trackPoint.y - 15));
-                const width = Math.min(30, canvas.width - x);
-                const height = Math.min(30, canvas.height - y);
-
-                const roi = src.roi(new cv.Rect(x, y, width, height));
-
+                const roiWidth = Math.min(30, canvas.width - x);
+                const roiHeight = Math.min(30, canvas.height - y);
+                
+                console.log("ROI at:", x, y, "size:", roiWidth, "x", roiHeight);
+                
+                const roi = src.roi(new cv.Rect(x, y, roiWidth, roiHeight));
+                
                 // 轉換為 HSV 顏色空間
                 const hsv = new cv.Mat();
                 cv.cvtColor(roi, hsv, cv.COLOR_RGBA2RGB);
                 cv.cvtColor(hsv, hsv, cv.COLOR_RGB2HSV);
-
+                
                 // 計算 ROI 中的平均 HSV 值
                 const mean = cv.mean(hsv);
-
+                
                 // 設定 HSV 範圍（加減一定的容差）
                 const h_tolerance = 20;
                 const s_tolerance = 70;
                 const v_tolerance = 70;
-
+                
                 params.HSV_min = [
                     Math.max(0, mean[0] - h_tolerance),
                     Math.max(0, mean[1] - s_tolerance),
                     Math.max(0, mean[2] - v_tolerance)
                 ];
-
+                
                 params.HSV_max = [
                     Math.min(180, mean[0] + h_tolerance),
                     Math.min(255, mean[1] + s_tolerance),
                     Math.min(255, mean[2] + v_tolerance)
                 ];
-
+                
+                console.log("HSV range:", params.HSV_min, "to", params.HSV_max);
+                
                 // 釋放 OpenCV 資源
                 src.delete();
                 roi.delete();
@@ -1605,28 +1785,30 @@
                 showNotification("計算顏色範圍時發生錯誤", "error");
             }
         }
-
+        
         // 處理所有幀
         async function processAllFrames() {
             try {
                 videoPlayer.pause();
-
+                
                 // 設置幀間隔 (秒)
                 const frameInterval = 1/30;
                 const startTime = editParams.startTime;
                 const endTime = editParams.endTime;
                 const totalFrames = Math.ceil((endTime - startTime) / frameInterval);
-
+                
+                trackingParams.isTracking = true;
+                
                 // 開始處理
                 for (let frameIndex = 0; frameIndex < totalFrames; frameIndex++) {
                     if (!trackingParams.isTracking) break;
-
+                    
                     // 設置當前時間
                     const currentTime = startTime + frameIndex * frameInterval;
                     if (currentTime > endTime) break;
-
+                    
                     videoPlayer.currentTime = currentTime;
-
+                    
                     // 等待視頻定位到指定時間
                     await new Promise(resolve => {
                         const onSeeked = () => {
@@ -1635,15 +1817,15 @@
                         };
                         videoPlayer.addEventListener('seeked', onSeeked);
                     });
-
+                    
                     // 處理當前幀
                     await processFrame(frameIndex, totalFrames);
-
+                    
                     // 更新進度
                     const progress = (frameIndex / totalFrames) * 100;
                     analysisProgress.style.width = `${progress}%`;
                 }
-
+                
                 finishTracking();
             } catch (error) {
                 console.error("處理幀時出錯:", error);
@@ -1651,23 +1833,27 @@
                 finishTracking();
             }
         }
-
+        
         // 處理單個幀
         async function processFrame(frameIndex, totalFrames) {
             try {
                 // 建立一個臨時 canvas 來處理視頻幀
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-
-                canvas.width = videoPlayer.videoWidth;
-                canvas.height = videoPlayer.videoHeight;
-
+                
+                // 使用視頻的實際尺寸或默認尺寸
+                const width = videoPlayer.videoWidth || defaultVideoWidth;
+                const height = videoPlayer.videoHeight || defaultVideoHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
                 // 繪製當前視頻幀
                 ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
-
+                
                 // 追蹤當前幀中的槓鈴
                 const trackResult = trackBarbellInFrame(canvas, trackingParams);
-
+                
                 // 估計骨架姿勢
                 let poseResult = null;
                 if (poseNetReady && poseNetModel) {
@@ -1675,20 +1861,20 @@
                         poseResult = await poseNetModel.estimateSinglePose(canvas, {
                             flipHorizontal: false
                         });
-
+                        
                         // 計算關節角度
-                        const kneeJointAngle = calculateJointAngle(poseResult, 'leftHip', 'leftKnee', 'leftAnkle') ||
+                        const kneeJointAngle = calculateJointAngle(poseResult, 'leftHip', 'leftKnee', 'leftAnkle') || 
                                              calculateJointAngle(poseResult, 'rightHip', 'rightKnee', 'rightAnkle');
-
-                        const hipJointAngle = calculateJointAngle(poseResult, 'leftShoulder', 'leftHip', 'leftKnee') ||
+                        
+                        const hipJointAngle = calculateJointAngle(poseResult, 'leftShoulder', 'leftHip', 'leftKnee') || 
                                             calculateJointAngle(poseResult, 'rightShoulder', 'rightHip', 'rightKnee');
-
-                        const shoulderJointAngle = calculateJointAngle(poseResult, 'leftElbow', 'leftShoulder', 'leftHip') ||
+                        
+                        const shoulderJointAngle = calculateJointAngle(poseResult, 'leftElbow', 'leftShoulder', 'leftHip') || 
                                                  calculateJointAngle(poseResult, 'rightElbow', 'rightShoulder', 'rightHip');
-
-                        const elbowJointAngle = calculateJointAngle(poseResult, 'leftWrist', 'leftElbow', 'leftShoulder') ||
+                        
+                        const elbowJointAngle = calculateJointAngle(poseResult, 'leftWrist', 'leftElbow', 'leftShoulder') || 
                                               calculateJointAngle(poseResult, 'rightWrist', 'rightElbow', 'rightShoulder');
-
+                        
                         // 儲存角度數據
                         if (kneeJointAngle) {
                             analysisData.angles.knee.push({
@@ -1696,35 +1882,35 @@
                                 value: kneeJointAngle
                             });
                         }
-
+                        
                         if (hipJointAngle) {
                             analysisData.angles.hip.push({
                                 time: videoPlayer.currentTime,
                                 value: hipJointAngle
                             });
                         }
-
+                        
                         if (shoulderJointAngle) {
                             analysisData.angles.shoulder.push({
                                 time: videoPlayer.currentTime,
                                 value: shoulderJointAngle
                             });
                         }
-
+                        
                         if (elbowJointAngle) {
                             analysisData.angles.elbow.push({
                                 time: videoPlayer.currentTime,
                                 value: elbowJointAngle
                             });
                         }
-
+                        
                         // 儲存姿勢
                         analysisData.poses.push(poseResult);
                     } catch (error) {
                         console.error("姿勢估計錯誤:", error);
                     }
                 }
-
+                
                 if (trackResult) {
                     // 儲存追蹤結果
                     analysisData.trajectoryPoints.push({
@@ -1733,32 +1919,32 @@
                         frame: frameIndex,
                         time: videoPlayer.currentTime
                     });
-
+                    
                     // 儲存時間點
                     analysisData.timePoints.push(videoPlayer.currentTime);
-
+                    
                     // 計算速度和位移（從第二幀開始）
                     if (analysisData.trajectoryPoints.length > 1) {
                         const current = analysisData.trajectoryPoints[analysisData.trajectoryPoints.length - 1];
                         const previous = analysisData.trajectoryPoints[analysisData.trajectoryPoints.length - 2];
-
+                        
                         const deltaTime = current.time - previous.time;
                         const deltaY = previous.y - current.y; // 向上為正
                         const deltaX = current.x - previous.x; // 水平位移
-
+                        
                         if (deltaTime > 0) {
                             const velocity = deltaY / deltaTime; // 像素/秒
-
+                            
                             // 轉換為 cm/s (使用運動員身高比例)
                             const height = parseFloat(athleteHeight.value) || 175; // 預設175cm
                             const pixelToCm = height / canvas.height; // 假設人身高大約等於畫面高度
                             const velocityCm = velocity * pixelToCm;
-
+                            
                             analysisData.velocityData.push({
                                 time: current.time,
                                 value: velocityCm
                             });
-
+                            
                             // 位移數據
                             const centerY = canvas.height / 2;
                             analysisData.displacementData.push({
@@ -1767,32 +1953,32 @@
                             });
                         }
                     }
-
+                    
                     // 繪製追蹤軌跡 (每5幀或最後一幀更新一次以提高效率)
                     if (frameIndex % 5 === 0 || frameIndex === totalFrames - 1) {
                         const trackingCtx = trackingOverlay.getContext('2d');
                         trackingCtx.clearRect(0, 0, trackingOverlay.width, trackingOverlay.height);
-
+                        
                         // 繪製路徑
                         if (analysisData.trajectoryPoints.length > 1) {
                             trackingCtx.beginPath();
                             trackingCtx.moveTo(
-                                analysisData.trajectoryPoints[0].x,
+                                analysisData.trajectoryPoints[0].x, 
                                 analysisData.trajectoryPoints[0].y
                             );
-
+                            
                             for (let i = 1; i < analysisData.trajectoryPoints.length; i++) {
                                 trackingCtx.lineTo(
-                                    analysisData.trajectoryPoints[i].x,
+                                    analysisData.trajectoryPoints[i].x, 
                                     analysisData.trajectoryPoints[i].y
                                 );
                             }
-
+                            
                             trackingCtx.strokeStyle = 'yellow';
                             trackingCtx.lineWidth = 2;
                             trackingCtx.stroke();
                         }
-
+                        
                         // 繪製當前點
                         trackingCtx.beginPath();
                         trackingCtx.arc(trackResult.x, trackResult.y, 10, 0, Math.PI * 2);
@@ -1804,76 +1990,76 @@
                 console.error("幀處理錯誤:", error);
             }
         }
-
+        
         // 使用 OpenCV 在幀中追蹤槓鈴
         function trackBarbellInFrame(canvas, params) {
             if (!opencvReady) return null;
-
+            
             try {
                 // 獲取 canvas 的像素數據
                 const ctx = canvas.getContext('2d');
                 const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
+                
                 // 轉換為 OpenCV Mat
                 const src = cv.matFromImageData(imgData);
-
+                
                 // 預處理：轉換為 RGB 然後 HSV
                 const rgbMat = new cv.Mat();
                 cv.cvtColor(src, rgbMat, cv.COLOR_RGBA2RGB);
-
+                
                 const hsvMat = new cv.Mat();
                 cv.cvtColor(rgbMat, hsvMat, cv.COLOR_RGB2HSV);
-
+                
                 // 使用 HSV 顏色範圍進行遮罩
                 const mask = new cv.Mat();
                 const low = new cv.Mat(1, 3, cv.CV_8UC1);
                 const high = new cv.Mat(1, 3, cv.CV_8UC1);
-
+                
                 // 設定 HSV 範圍
                 low.data[0] = params.HSV_min[0];
                 low.data[1] = params.HSV_min[1];
                 low.data[2] = params.HSV_min[2];
-
+                
                 high.data[0] = params.HSV_max[0];
                 high.data[1] = params.HSV_max[1];
                 high.data[2] = params.HSV_max[2];
-
+                
                 // 創建遮罩
                 cv.inRange(hsvMat, low, high, mask);
-
+                
                 // 應用形態學操作來減少噪音
                 const kernel = cv.Mat.ones(5, 5, cv.CV_8U);
                 const morphed = new cv.Mat();
-
+                
                 cv.morphologyEx(mask, morphed, cv.MORPH_OPEN, kernel);
                 cv.morphologyEx(morphed, morphed, cv.MORPH_CLOSE, kernel);
-
+                
                 // 應用高斯模糊減少噪點
                 const blurred = new cv.Mat();
                 cv.GaussianBlur(morphed, blurred, new cv.Size(5, 5), 0, 0, cv.BORDER_DEFAULT);
-
+                
                 // 尋找輪廓
                 const contours = new cv.MatVector();
                 const hierarchy = new cv.Mat();
-
+                
                 cv.findContours(blurred, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
+                
                 let largestContourIndex = -1;
                 let largestContourArea = 0;
-
+                
                 // 尋找最大的輪廓
                 for (let i = 0; i < contours.size(); ++i) {
                     const contour = contours.get(i);
                     const area = cv.contourArea(contour);
-
+                    
                     if (area > largestContourArea) {
                         largestContourArea = area;
                         largestContourIndex = i;
                     }
                 }
-
+                
                 let result = null;
-
+                
                 // 如果找到了輪廓
                 if (largestContourIndex !== -1) {
                     // 計算輪廓的質心
@@ -1881,11 +2067,11 @@
                     if (moments.m00 !== 0) {
                         const centerX = moments.m10 / moments.m00;
                         const centerY = moments.m01 / moments.m00;
-
+                        
                         result = { x: centerX, y: centerY };
                     }
                 }
-
+                
                 // 如果沒有找到適合的輪廓，使用最後已知的位置
                 if (!result && params === trackingParams && analysisData.trajectoryPoints.length > 0) {
                     const previousPoint = analysisData.trajectoryPoints[analysisData.trajectoryPoints.length - 1];
@@ -1897,7 +2083,7 @@
                     // 如果是第一幀且沒找到，使用用戶選擇的點
                     result = { x: params.trackPoint.x, y: params.trackPoint.y };
                 }
-
+                
                 // 釋放 OpenCV 資源
                 src.delete();
                 rgbMat.delete();
@@ -1910,26 +2096,26 @@
                 blurred.delete();
                 contours.delete();
                 hierarchy.delete();
-
+                
                 return result;
             } catch (err) {
                 console.error("OpenCV 追蹤錯誤:", err);
                 return null;
             }
         }
-
+        
         // 完成追蹤
         function finishTracking() {
             trackingParams.isTracking = false;
-
+            
             // 更新 UI
             loadingIndicator.classList.add('hidden');
             trackBarbell.classList.remove('hidden');
             stopTracking.classList.add('hidden');
-
+            
             // 生成分析數據
             calculatePower();
-
+            
             // 顯示分析結果
             drawTrajectory();
             createVelocityChart();
@@ -1937,33 +2123,33 @@
             createDisplacementChart();
             createAnglesChart();
             updateMetrics();
-
+            
             // 回到視頻開頭
             videoPlayer.currentTime = editParams.startTime;
             videoPlayer.play();
-
+            
             showNotification("槓鈴追蹤分析完成！", "success");
         }
-
+        
         // 停止追蹤
         stopTracking.addEventListener('click', function() {
             trackingParams.isTracking = false;
             finishTracking();
         });
-
+        
         // 重設追蹤
         resetTracking.addEventListener('click', function() {
             // 清空 canvas
             const ctx = trackingOverlay.getContext('2d');
             ctx.clearRect(0, 0, trackingOverlay.width, trackingOverlay.height);
-
+            
             const skeletonCtx = skeletonOverlay.getContext('2d');
             skeletonCtx.clearRect(0, 0, skeletonOverlay.width, skeletonOverlay.height);
-
+            
             // 重設追蹤參數
             trackingParams.isTracking = false;
             trackingParams.isPointSelected = false;
-
+            
             // 清空數據
             analysisData.trajectoryPoints = [];
             analysisData.velocityData = [];
@@ -1985,39 +2171,39 @@
                 catch: -1,
                 liftStart: -1
             };
-
+            
             // 重設 UI
             trackBarbell.classList.remove('hidden');
             stopTracking.classList.add('hidden');
             markKeyPoint.classList.add('hidden');
             keyPointType.classList.add('hidden');
             loadingIndicator.classList.add('hidden');
-
+            
             // 清空圖表
             const trajectoryCtx = trajectoryCanvas.getContext('2d');
             trajectoryCtx.clearRect(0, 0, trajectoryCanvas.width, trajectoryCanvas.height);
-
+            
             if (velocityChartInstance) velocityChartInstance.destroy();
             if (powerChartInstance) powerChartInstance.destroy();
             if (displacementChartInstance) displacementChartInstance.destroy();
             if (anglesChartInstance) anglesChartInstance.destroy();
-
+            
             // 清空指標顯示
             maxHeight.textContent = "-";
             liftEfficiency.textContent = "-";
             maxVelocity.textContent = "-";
             maxPower.textContent = "-";
-
+            
             showNotification("追蹤數據已重設", "info");
         });
-
+        
         // 切換骨架顯示
         toggleSkeleton.addEventListener('click', function() {
             trackingParams.showSkeleton = !trackingParams.showSkeleton;
-
+            
             if (trackingParams.showSkeleton) {
                 this.textContent = "隱藏骨架";
-
+                
                 if (analysisData.poses.length > 0) {
                     updatePoseDisplay();
                 } else {
@@ -2029,53 +2215,58 @@
                 ctx.clearRect(0, 0, skeletonOverlay.width, skeletonOverlay.height);
             }
         });
-
+        
         // 為當前幀估計姿勢
         async function estimatePoseForCurrentFrame() {
             if (!poseNetReady || !poseNetModel) {
                 showNotification("骨架分析模型尚未準備好", "warning");
                 return;
             }
-
+            
             try {
                 // 將當前影片幀繪製到 canvas 上
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-
-                canvas.width = videoPlayer.videoWidth;
-                canvas.height = videoPlayer.videoHeight;
+                
+                // 使用視頻的實際尺寸或默認尺寸
+                const width = videoPlayer.videoWidth || defaultVideoWidth;
+                const height = videoPlayer.videoHeight || defaultVideoHeight;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
                 ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
-
+                
                 // 使用 PoseNet 檢測姿勢
                 const pose = await poseNetModel.estimateSinglePose(canvas, {
                     flipHorizontal: false
                 });
-
+                
                 // 繪製骨架
                 if (trackingParams.showSkeleton) {
                     drawSkeleton(pose, skeletonOverlay, trackingParams.activeJoints);
                 }
-
+                
                 // 更新角度顯示
                 if (trackingParams.showAngles) {
                     updateAngleDisplay(pose);
                 }
-
+                
                 showNotification("骨架分析完成", "success");
             } catch (error) {
                 console.error("姿勢估計錯誤:", error);
                 showNotification("骨架分析失敗", "error");
             }
         }
-
+        
         // 切換角度顯示
         toggleAngles.addEventListener('click', function() {
             trackingParams.showAngles = !trackingParams.showAngles;
-
+            
             if (trackingParams.showAngles) {
                 this.textContent = "隱藏關節角度";
                 angleOverlay.classList.remove('hidden');
-
+                
                 if (analysisData.poses.length > 0) {
                     updatePoseDisplay();
                 } else {
@@ -2086,21 +2277,21 @@
                 angleOverlay.classList.add('hidden');
             }
         });
-
+        
         // 標記關鍵點
         markKeyPoint.addEventListener('click', function() {
             const type = keyPointType.value;
-
+            
             if (!analysisData.trajectoryPoints.length) {
                 showNotification('請先追蹤槓鈴', 'warning');
                 return;
             }
-
+            
             // 獲取當前幀索引
             const currentTime = videoPlayer.currentTime;
             let bestIndex = 0;
             let minTimeDiff = Infinity;
-
+            
             // 尋找最接近當前時間的幀
             for (let i = 0; i < analysisData.timePoints.length; i++) {
                 const diff = Math.abs(analysisData.timePoints[i] - currentTime);
@@ -2109,49 +2300,49 @@
                     bestIndex = i;
                 }
             }
-
+            
             // 設置關鍵點
             analysisData.keyPoints[type] = bestIndex;
-
+            
             // 更新軌跡顯示
             drawTrajectory();
-
+            
             // 更新圖表
             createVelocityChart();
             createPowerChart();
             createDisplacementChart();
             createAnglesChart();
-
+            
             // 更新指標
             updateMetrics();
-
+            
             showNotification(`已標記${getKeyPointName(type)}`, "success");
         });
-
+        
         // 關節選擇器
         jointCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const joint = this.value;
                 trackingParams.activeJoints[joint] = this.checked;
                 compareTrackingParams.activeJoints[joint] = this.checked;
-
+                
                 // 更新顯示
                 updatePoseDisplay();
             });
         });
-
+        
         // 當視頻時間更新時更新姿勢顯示
         videoPlayer.addEventListener('timeupdate', updatePoseDisplay);
-
+        
         // 更新當前幀的姿勢顯示
         function updatePoseDisplay() {
             if (!trackingParams.showSkeleton || analysisData.poses.length === 0) return;
-
+            
             // 找到當前時間最接近的姿勢
             const currentTime = videoPlayer.currentTime;
             let closestPose = null;
             let minTimeDiff = Infinity;
-
+            
             for (let i = 0; i < analysisData.timePoints.length; i++) {
                 const timeDiff = Math.abs(analysisData.timePoints[i] - currentTime);
                 if (timeDiff < minTimeDiff) {
@@ -2161,96 +2352,96 @@
                     }
                 }
             }
-
+            
             if (closestPose) {
                 drawSkeleton(closestPose, skeletonOverlay, trackingParams.activeJoints);
-
+                
                 if (trackingParams.showAngles) {
                     updateAngleDisplay(closestPose);
                 }
             }
         }
-
+        
         // 更新角度顯示
         function updateAngleDisplay(pose) {
             // 計算膝關節角度
-            const kneeJointAngle = calculateJointAngle(pose, 'leftHip', 'leftKnee', 'leftAnkle') ||
+            const kneeJointAngle = calculateJointAngle(pose, 'leftHip', 'leftKnee', 'leftAnkle') || 
                                  calculateJointAngle(pose, 'rightHip', 'rightKnee', 'rightAnkle');
-
+            
             // 計算髖關節角度
-            const hipJointAngle = calculateJointAngle(pose, 'leftShoulder', 'leftHip', 'leftKnee') ||
+            const hipJointAngle = calculateJointAngle(pose, 'leftShoulder', 'leftHip', 'leftKnee') || 
                                 calculateJointAngle(pose, 'rightShoulder', 'rightHip', 'rightKnee');
-
+            
             // 計算肩關節角度
-            const shoulderJointAngle = calculateJointAngle(pose, 'leftElbow', 'leftShoulder', 'leftHip') ||
+            const shoulderJointAngle = calculateJointAngle(pose, 'leftElbow', 'leftShoulder', 'leftHip') || 
                                      calculateJointAngle(pose, 'rightElbow', 'rightShoulder', 'rightHip');
-
+            
             // 計算肘關節角度
-            const elbowJointAngle = calculateJointAngle(pose, 'leftWrist', 'leftElbow', 'leftShoulder') ||
+            const elbowJointAngle = calculateJointAngle(pose, 'leftWrist', 'leftElbow', 'leftShoulder') || 
                                   calculateJointAngle(pose, 'rightWrist', 'rightElbow', 'rightShoulder');
-
+            
             // 更新顯示
             kneeAngle.textContent = kneeJointAngle ? kneeJointAngle.toFixed(1) : "-";
             hipAngle.textContent = hipJointAngle ? hipJointAngle.toFixed(1) : "-";
             shoulderAngle.textContent = shoulderJointAngle ? shoulderJointAngle.toFixed(1) : "-";
             elbowAngle.textContent = elbowJointAngle ? elbowJointAngle.toFixed(1) : "-";
         }
-
+        
         // 計算關節角度
         function calculateJointAngle(pose, upperJoint, midJoint, lowerJoint) {
             // 獲取關節位置
             const upperPoint = getJointPosition(pose, upperJoint);
             const midPoint = getJointPosition(pose, midJoint);
             const lowerPoint = getJointPosition(pose, lowerJoint);
-
+            
             if (!upperPoint || !midPoint || !lowerPoint) return null;
-
+            
             // 計算向量
             const vector1 = {
                 x: upperPoint.x - midPoint.x,
                 y: upperPoint.y - midPoint.y
             };
-
+            
             const vector2 = {
                 x: lowerPoint.x - midPoint.x,
                 y: lowerPoint.y - midPoint.y
             };
-
+            
             // 計算角度
             const dotProduct = vector1.x * vector2.x + vector1.y * vector2.y;
             const magnitude1 = Math.sqrt(vector1.x * vector1.x + vector1.y * vector1.y);
             const magnitude2 = Math.sqrt(vector2.x * vector2.x + vector2.y * vector2.y);
-
+            
             if (magnitude1 === 0 || magnitude2 === 0) return null;
-
+            
             const cosAngle = dotProduct / (magnitude1 * magnitude2);
-
+            
             // 確保 cosAngle 在 -1 到 1 之間
             const clampedCosAngle = Math.max(-1, Math.min(1, cosAngle));
-
+            
             // 轉換為角度 (度)
             const angleInRadians = Math.acos(clampedCosAngle);
             const angleInDegrees = angleInRadians * (180 / Math.PI);
-
+            
             return angleInDegrees;
         }
-
+        
         // 從姿勢數據中獲取關節位置
         function getJointPosition(pose, jointName) {
             const keypoint = pose.keypoints.find(kp => kp.part === jointName);
-
+            
             if (keypoint && keypoint.score > 0.2) {
                 return { x: keypoint.position.x, y: keypoint.position.y };
             }
-
+            
             return null;
         }
-
+        
         // 繪製骨架
         function drawSkeleton(pose, canvas, activeJoints) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            
             // 定義骨架連接
             const pairs = [
                 ['leftShoulder', 'rightShoulder'],
@@ -2266,15 +2457,15 @@
                 ['rightHip', 'rightKnee'],
                 ['rightKnee', 'rightAnkle']
             ];
-
+            
             // 繪製骨架線條
             ctx.lineWidth = 3;
             ctx.strokeStyle = 'lime';
-
+            
             pairs.forEach(pair => {
                 const jointA = pair[0];
                 const jointB = pair[1];
-
+                
                 // 檢查是否需要顯示這個關節
                 const shouldShowJoint = (
                     (jointA.includes('Knee') || jointB.includes('Knee')) && activeJoints.knee ||
@@ -2282,12 +2473,12 @@
                     (jointA.includes('Shoulder') || jointB.includes('Shoulder')) && activeJoints.shoulder ||
                     (jointA.includes('Elbow') || jointB.includes('Elbow')) && activeJoints.elbow
                 );
-
+                
                 if (!shouldShowJoint) return;
-
+                
                 const pointA = getJointPosition(pose, jointA);
                 const pointB = getJointPosition(pose, jointB);
-
+                
                 if (pointA && pointB) {
                     ctx.beginPath();
                     ctx.moveTo(pointA.x, pointA.y);
@@ -2295,10 +2486,10 @@
                     ctx.stroke();
                 }
             });
-
+            
             // 繪製關節點
             ctx.fillStyle = 'red';
-
+            
             pose.keypoints.forEach(keypoint => {
                 if (keypoint.score > 0.2) {
                     // 檢查是否需要顯示這個關節
@@ -2308,7 +2499,7 @@
                         keypoint.part.includes('Shoulder') && activeJoints.shoulder ||
                         keypoint.part.includes('Elbow') && activeJoints.elbow
                     );
-
+                    
                     if (shouldShowJoint) {
                         ctx.beginPath();
                         ctx.arc(keypoint.position.x, keypoint.position.y, 5, 0, 2 * Math.PI);
@@ -2317,36 +2508,36 @@
                 }
             });
         }
-
+        
         // 計算功率
         function calculatePower() {
             const weight = parseFloat(weightInput.value) || 100; // 預設100公斤
             const gravity = 9.81; // m/s^2
-
+            
             analysisData.powerData = [];
-
+            
             for (let i = 1; i < analysisData.velocityData.length; i++) {
                 const v1 = analysisData.velocityData[i-1].value;
                 const v2 = analysisData.velocityData[i].value;
                 const t1 = analysisData.velocityData[i-1].time;
                 const t2 = analysisData.velocityData[i].time;
-
+                
                 const deltaTime = t2 - t1;
                 const acceleration = deltaTime > 0 ? (v2 - v1) / deltaTime : 0;
-
+                
                 // 力 (牛頓) = 質量 (公斤) * 加速度 (m/s^2)
                 const force = weight * (gravity + acceleration);
-
+                
                 // 功率 (瓦特) = 力 (牛頓) * 速度 (m/s)
                 const power = force * (analysisData.velocityData[i].value / 100); // 轉換cm為m
-
+                
                 analysisData.powerData.push({
                     time: analysisData.velocityData[i].time,
                     value: power
                 });
             }
         }
-
+        
         // 更新指標
         function updateMetrics() {
             // 計算最大值和指標
@@ -2354,91 +2545,95 @@
                 const maxVelocityValue = Math.max(...analysisData.velocityData.map(d => d.value));
                 maxVelocity.textContent = `${maxVelocityValue.toFixed(1)} cm/s`;
             }
-
+            
             if (analysisData.powerData.length > 0) {
                 const maxPowerValue = Math.max(...analysisData.powerData.map(d => d.value));
                 maxPower.textContent = `${maxPowerValue.toFixed(1)} W`;
             }
-
+            
             // 計算拉起效率
             if (analysisData.trajectoryPoints.length > 1) {
                 const startY = analysisData.trajectoryPoints[0].y;
                 const minY = Math.min(...analysisData.trajectoryPoints.map(p => p.y));
                 const totalVertical = startY - minY;
-
+                
                 const startX = analysisData.trajectoryPoints[0].x;
                 const maxHorizontalDeviation = Math.max(
                     ...analysisData.trajectoryPoints.map(p => Math.abs(p.x - startX))
                 );
-
+                
                 if (maxHorizontalDeviation > 0) {
                     const efficiency = totalVertical / maxHorizontalDeviation;
                     liftEfficiency.textContent = efficiency.toFixed(2);
                 }
-
+                
                 // 計算最大高度
                 const height = parseFloat(athleteHeight.value) || 175;
-                const pixelToCm = height / videoPlayer.videoHeight;
+                const videoDimension = videoPlayer.videoHeight || defaultVideoHeight;
+                const pixelToCm = height / videoDimension;
                 const maxHeight_cm = totalVertical * pixelToCm;
                 maxHeight.textContent = `${maxHeight_cm.toFixed(1)} cm`;
             }
         }
-
+        
         // 繪製軌跡
         function drawTrajectory() {
             const points = analysisData.trajectoryPoints;
-            if (!points.length) return;
-
+            if (!points || points.length === 0) {
+                console.log("No trajectory points to draw");
+                return;
+            }
+            
             const canvas = trajectoryCanvas;
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            
             // 計算縮放比例
             const minX = Math.min(...points.map(p => p.x));
             const maxX = Math.max(...points.map(p => p.x));
             const minY = Math.min(...points.map(p => p.y));
             const maxY = Math.max(...points.map(p => p.y));
-
+            
             const padding = 20;
             const scaleX = (canvas.width - padding * 2) / (maxX - minX || 1);
             const scaleY = (canvas.height - padding * 2) / (maxY - minY || 1);
-
+            
             // 繪製背景網格
             ctx.strokeStyle = 'rgba(200,200,200,0.3)';
             ctx.lineWidth = 0.5;
-
+            
             for (let x = 0; x < canvas.width; x += 20) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
-
+            
             for (let y = 0; y < canvas.height; y += 20) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             }
-
+            
             // 繪製軌跡
             ctx.beginPath();
             ctx.moveTo(
                 (points[0].x - minX) * scaleX + padding,
                 (points[0].y - minY) * scaleY + padding
             );
-
+            
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(
                     (points[i].x - minX) * scaleX + padding,
                     (points[i].y - minY) * scaleY + padding
                 );
             }
-
+            
             ctx.strokeStyle = 'blue';
             ctx.lineWidth = 3;
             ctx.stroke();
-
+            
             // 標記起點和終點
             ctx.fillStyle = 'green';
             ctx.beginPath();
@@ -2448,7 +2643,7 @@
                 5, 0, Math.PI * 2
             );
             ctx.fill();
-
+            
             ctx.fillStyle = 'red';
             ctx.beginPath();
             ctx.arc(
@@ -2457,46 +2652,61 @@
                 5, 0, Math.PI * 2
             );
             ctx.fill();
-
+            
             // 標記關鍵點
             for (const [key, index] of Object.entries(analysisData.keyPoints)) {
                 if (index >= 0 && index < points.length) {
                     const point = points[index];
                     const x = (point.x - minX) * scaleX + padding;
                     const y = (point.y - minY) * scaleY + padding;
-
+                    
                     ctx.fillStyle = getKeyPointColor(key);
                     ctx.beginPath();
                     ctx.arc(x, y, 7, 0, Math.PI * 2);
                     ctx.fill();
-
+                    
                     ctx.fillStyle = getKeyPointColor(key);
                     ctx.font = '12px Arial';
                     ctx.fillText(getKeyPointName(key), x + 10, y);
                 }
             }
+            
+            // 顯示軸標籤
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('水平位移', canvas.width / 2, canvas.height - 5);
+            
+            ctx.save();
+            ctx.translate(15, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('垂直位移', 0, 0);
+            ctx.restore();
         }
-
+        
         // 創建速度圖表
         function createVelocityChart() {
             const ctx = velocityChart.getContext('2d');
-
+            
             if (velocityChartInstance) {
                 velocityChartInstance.destroy();
             }
-
-            if (analysisData.velocityData.length === 0) return;
-
+            
+            if (!analysisData.velocityData || analysisData.velocityData.length === 0) {
+                console.log("No velocity data to chart");
+                return;
+            }
+            
             const timeLabels = analysisData.velocityData.map(d => d.time);
             const velocityValues = analysisData.velocityData.map(d => d.value);
-
+            
             // 標記關鍵點位置
             const annotations = {};
-
+            
             for (const [key, index] of Object.entries(analysisData.keyPoints)) {
                 if (index >= 0 && index < analysisData.timePoints.length) {
                     const time = analysisData.timePoints[index];
-
+                    
                     annotations[key] = {
                         type: 'line',
                         scaleID: 'x',
@@ -2515,7 +2725,7 @@
                     };
                 }
             }
-
+            
             velocityChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2555,28 +2765,33 @@
                     }
                 }
             });
+            
+            console.log("Velocity chart created");
         }
-
+        
         // 創建功率圖表
         function createPowerChart() {
             const ctx = powerChart.getContext('2d');
-
+            
             if (powerChartInstance) {
                 powerChartInstance.destroy();
             }
-
-            if (analysisData.powerData.length === 0) return;
-
+            
+            if (!analysisData.powerData || analysisData.powerData.length === 0) {
+                console.log("No power data to chart");
+                return;
+            }
+            
             const timeLabels = analysisData.powerData.map(d => d.time);
             const powerValues = analysisData.powerData.map(d => d.value);
-
+            
             // 標記關鍵點
             const annotations = {};
-
+            
             for (const [key, index] of Object.entries(analysisData.keyPoints)) {
                 if (index >= 0 && index < analysisData.timePoints.length) {
                     const time = analysisData.timePoints[index];
-
+                    
                     annotations[key] = {
                         type: 'line',
                         scaleID: 'x',
@@ -2595,7 +2810,7 @@
                     };
                 }
             }
-
+            
             powerChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2635,28 +2850,33 @@
                     }
                 }
             });
+            
+            console.log("Power chart created");
         }
-
+        
         // 創建位移圖表
         function createDisplacementChart() {
             const ctx = displacementChart.getContext('2d');
-
+            
             if (displacementChartInstance) {
                 displacementChartInstance.destroy();
             }
-
-            if (analysisData.displacementData.length === 0) return;
-
+            
+            if (!analysisData.displacementData || analysisData.displacementData.length === 0) {
+                console.log("No displacement data to chart");
+                return;
+            }
+            
             const timeLabels = analysisData.displacementData.map(d => d.time);
             const displacementValues = analysisData.displacementData.map(d => d.value);
-
+            
             // 標記關鍵點
             const annotations = {};
-
+            
             for (const [key, index] of Object.entries(analysisData.keyPoints)) {
                 if (index >= 0 && index < analysisData.timePoints.length) {
                     const time = analysisData.timePoints[index];
-
+                    
                     annotations[key] = {
                         type: 'line',
                         scaleID: 'x',
@@ -2675,7 +2895,7 @@
                     };
                 }
             }
-
+            
             displacementChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2715,22 +2935,27 @@
                     }
                 }
             });
+            
+            console.log("Displacement chart created");
         }
-
+        
         // 創建角度圖表
         function createAnglesChart() {
             const ctx = anglesChart.getContext('2d');
-
+            
             if (anglesChartInstance) {
                 anglesChartInstance.destroy();
             }
-
-            if (Object.values(analysisData.angles).every(arr => arr.length === 0)) return;
-
+            
+            if (Object.values(analysisData.angles).every(arr => !arr || arr.length === 0)) {
+                console.log("No angle data to chart");
+                return;
+            }
+            
             // 準備數據集
             const datasets = [];
-
-            if (analysisData.angles.knee.length > 0) {
+            
+            if (analysisData.angles.knee && analysisData.angles.knee.length > 0) {
                 datasets.push({
                     label: '膝關節角度',
                     data: analysisData.angles.knee.map(d => ({
@@ -2744,8 +2969,8 @@
                     pointRadius: 1
                 });
             }
-
-            if (analysisData.angles.hip.length > 0) {
+            
+            if (analysisData.angles.hip && analysisData.angles.hip.length > 0) {
                 datasets.push({
                     label: '髖關節角度',
                     data: analysisData.angles.hip.map(d => ({
@@ -2759,8 +2984,8 @@
                     pointRadius: 1
                 });
             }
-
-            if (analysisData.angles.shoulder.length > 0) {
+            
+            if (analysisData.angles.shoulder && analysisData.angles.shoulder.length > 0) {
                 datasets.push({
                     label: '肩關節角度',
                     data: analysisData.angles.shoulder.map(d => ({
@@ -2774,8 +2999,8 @@
                     pointRadius: 1
                 });
             }
-
-            if (analysisData.angles.elbow.length > 0) {
+            
+            if (analysisData.angles.elbow && analysisData.angles.elbow.length > 0) {
                 datasets.push({
                     label: '肘關節角度',
                     data: analysisData.angles.elbow.map(d => ({
@@ -2789,7 +3014,7 @@
                     pointRadius: 1
                 });
             }
-
+            
             anglesChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2815,36 +3040,38 @@
                     }
                 }
             });
+            
+            console.log("Angles chart created");
         }
-
+        
         // 比較影片功能
         selectCompareTrackPoint.addEventListener('click', function() {
             if (!compareVideoPlayer.src) {
                 showNotification('請先上傳比較影片', 'warning');
                 return;
             }
-
+            
             // 顯示點選擇器
             comparePointSelector.style.display = 'block';
             compareTrackingParams.isPointSelected = false;
-
+            
             showNotification("請點擊比較視頻中要追蹤的槓鈴位置", "info");
         });
-
+        
         // 標記比較影片關鍵點
         markCompareKeyPoint.addEventListener('click', function() {
             const type = compareKeyPointType.value;
-
+            
             if (!compareData.trajectoryPoints.length) {
                 showNotification('請先追蹤比較影片中的槓鈴', 'warning');
                 return;
             }
-
+            
             // 獲取當前幀索引
             const currentTime = compareVideoPlayer.currentTime;
             let bestIndex = 0;
             let minTimeDiff = Infinity;
-
+            
             // 尋找最接近當前時間的幀
             for (let i = 0; i < compareData.timePoints.length; i++) {
                 const diff = Math.abs(compareData.timePoints[i] - currentTime);
@@ -2853,130 +3080,138 @@
                     bestIndex = i;
                 }
             }
-
+            
             // 設置關鍵點
             compareData.keyPoints[type] = bestIndex;
-
+            
             showNotification(`已標記比較影片${getKeyPointName(type)}`, "success");
         });
-
+        
         // 同步影片功能
         syncVideos.addEventListener('click', function() {
             if (!analysisData.trajectoryPoints.length || !compareData.trajectoryPoints.length) {
                 showNotification('請先完成兩個影片的追蹤', 'warning');
                 return;
             }
-
+            
             const syncPointType = syncPoint.value;
-
+            
             // 檢查是否標記了同步點
             if (analysisData.keyPoints[syncPointType] < 0 || compareData.keyPoints[syncPointType] < 0) {
                 showNotification(`請先在兩個影片中標記${getKeyPointName(syncPointType)}`, 'warning');
                 return;
             }
-
+            
             // 獲取同步點時間
             const origTime = analysisData.timePoints[analysisData.keyPoints[syncPointType]];
             const compareTime = compareData.timePoints[compareData.keyPoints[syncPointType]];
-
+            
             // 設置影片時間
             videoPlayer.currentTime = origTime;
             compareVideoPlayer.currentTime = compareTime;
-
+            
             // 顯示通知
             showNotification(`已同步影片至${getKeyPointName(syncPointType)}`, 'success');
         });
-
+        
         // 透明度滑桿
         opacitySlider.addEventListener('input', function() {
             const opacity = this.value / 100;
             compareVideoPlayer.style.opacity = opacity;
         });
-
+        
         // 點擊比較視頻選擇追蹤點
         compareVideoPlayer.addEventListener('click', function(e) {
             if (comparePointSelector.style.display === 'block') {
                 const rect = compareVideoPlayer.getBoundingClientRect();
-                const scaleX = compareVideoPlayer.videoWidth / rect.width;
-                const scaleY = compareVideoPlayer.videoHeight / rect.height;
-
+                
+                // 獲取視頻實際尺寸
+                const videoWidth = compareVideoPlayer.videoWidth || defaultVideoWidth;
+                const videoHeight = compareVideoPlayer.videoHeight || defaultVideoHeight;
+                
+                // 計算縮放比例
+                const scaleX = videoWidth / rect.width;
+                const scaleY = videoHeight / rect.height;
+                
                 // 計算點擊位置
                 const x = (e.clientX - rect.left) * scaleX;
                 const y = (e.clientY - rect.top) * scaleY;
-
+                
+                console.log("Compare track point selected at:", x, y, "with scale:", scaleX, scaleY);
+                
                 // 保存追蹤點
                 compareTrackingParams.trackPoint = { x, y };
                 compareTrackingParams.isPointSelected = true;
-
+                
                 // 更新顯示點選擇器位置
                 comparePointSelector.style.left = `${e.clientX}px`;
                 comparePointSelector.style.top = `${e.clientY}px`;
-
+                
                 // 閃爍效果
                 setTimeout(() => {
                     comparePointSelector.style.display = 'none';
-
+                    
                     // 繪製追蹤點
                     const ctx = compareOverlay.getContext('2d');
                     ctx.clearRect(0, 0, compareOverlay.width, compareOverlay.height);
-
+                    
                     ctx.beginPath();
                     ctx.arc(x, y, 12, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(255, 255, 0, 0.7)';
                     ctx.fill();
-
+                    
                     // 標記中心點
                     ctx.beginPath();
                     ctx.arc(x, y, 3, 0, Math.PI * 2);
                     ctx.fillStyle = 'yellow';
                     ctx.fill();
-
+                    
                     // 顯示標記關鍵點按鈕
                     markCompareKeyPoint.classList.remove('hidden');
                     compareKeyPointType.classList.remove('hidden');
                 }, 1000);
-
+                
                 showNotification("已選擇比較影片追蹤點", "success");
             }
         });
-
+        
         // 標籤頁切換
         const analysisTabs = document.querySelectorAll('#analysisTabs .tab');
         const analysisTabContents = document.querySelectorAll('[id$="Tab"]');
-
+        
         analysisTabs.forEach(tab => {
             tab.addEventListener('click', function() {
                 // 移除所有標籤頁的活躍狀態
                 analysisTabs.forEach(t => t.classList.remove('active'));
                 analysisTabContents.forEach(content => content.classList.add('hidden'));
-
+                
                 // 添加當前標籤頁的活躍狀態
                 this.classList.add('active');
-
+                
                 // 顯示對應的內容
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(`${tabId}Tab`).classList.remove('hidden');
             });
         });
-
+        
         const comparisonTabs = document.querySelectorAll('#comparisonTabs .tab');
         const comparisonTabContents = document.querySelectorAll('[id$="CompareTab"]');
-
+        
         comparisonTabs.forEach(tab => {
             tab.addEventListener('click', function() {
                 // 移除所有標籤頁的活躍狀態
                 comparisonTabs.forEach(t => t.classList.remove('active'));
                 comparisonTabContents.forEach(content => content.classList.add('hidden'));
-
+                
                 // 添加當前標籤頁的活躍狀態
                 this.classList.add('active');
-
+                
                 // 顯示對應的內容
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(`${tabId}Tab`).classList.remove('hidden');
             });
         });
-
+        
         // 關鍵點輔助函數
         function getKeyPointColor(key) {
             switch (key) {
@@ -2989,7 +3224,7 @@
                 default: return 'gray';
             }
         }
-
+        
         function getKeyPointName(key) {
             switch (key) {
                 case 'start': return '起始點';
@@ -3000,6 +3235,7 @@
                 case 'liftStart': return '拉起槓鈴時';
                 default: return '未知點';
             }
-        }</script>
+        }
+    </script>
 </body>
 </html>
